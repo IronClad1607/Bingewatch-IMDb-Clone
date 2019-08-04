@@ -6,6 +6,7 @@
     android:background="@drawable/gradientsplash"
     android:orientation="vertical"
     android:padding="20dp"
+    android:theme="@style/Theme.AppCompat.NoActionBar"
     tools:context=".activities.MainActivity">
 
     <ImageView
