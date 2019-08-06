@@ -1,6 +1,6 @@
 package com.ironclad.bingewatch.movie_modal
 
-data class MoviesDetails(
+data class MovieDetails(
     val release_date: String,
     val backdrop_path: String,
     val id: Int,

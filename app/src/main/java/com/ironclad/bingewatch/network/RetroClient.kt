@@ -12,5 +12,5 @@ object RetroClient {
 
     val authAPI = retrofit().create(AuthAPI::class.java)
 
-//    val movieAPI = retrofit().create(MovieAPI::class.java)
+    val movieAPI = retrofit().create(MovieAPI::class.java)
 }
