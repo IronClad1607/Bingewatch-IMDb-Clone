@@ -57,6 +57,10 @@ class MovieFragment : Fragment(), CoroutineScope {
             rvTopRated.layoutManager = lMTopRated
 
             createPopular(1, 0)
+            createCinema(1, 0)
+            createUpcoming(1, 0)
+            createTopRated(1, 0)
+
             rvPopularMovies.addOnScrollListener(object : RecyclerView.OnScrollListener() {
                 override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                     super.onScrolled(recyclerView, dx, dy)
@@ -67,8 +71,114 @@ class MovieFragment : Fragment(), CoroutineScope {
                 }
             })
 
+            rvCinemas.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+                override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                    super.onScrolled(recyclerView, dx, dy)
+                    lastVisibleItemIdCinema = lMCinema.findLastVisibleItemPosition()
+                    if (lastVisibleItemIdCinema == mMoviesCinema.size - 1 && !loadingMoreCinema) {
+                        loadMoreCinema(iCinema++)
+                    }
+                }
+            })
+
+            rvComingSoon.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+                override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                    super.onScrolled(recyclerView, dx, dy)
+                    lastVisibleItemIdUpcoming = lMUpcoming.findLastVisibleItemPosition()
+                    if (lastVisibleItemIdUpcoming == mMoviesUpcoming.size - 1 && !loadingMoreUpcoming) {
+                        loadMoreUpComing(iUpcoming++)
+                    }
+                }
+            })
+
+            rvTopRated.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+                override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                    super.onScrolled(recyclerView, dx, dy)
+                    lastVisibleItemIdTopRated = lMTopRated.findLastVisibleItemPosition()
+                    if (lastVisibleItemIdTopRated == mMoviesTopRated.size - 1 && !loadingMoreTopRated) {
+                        loadMoreTopRated(iTopRated++)
+                    }
+                }
+            })
+
         }
         return inflater.inflate(R.layout.fragment_movie, container, false)
+    }
+
+    private fun loadMoreTopRated(i: Int) {
+        loadingMoreTopRated = true
+        launch {
+            createTopRated(i, lastVisibleItemIdTopRated)
+        }
+    }
+
+    private suspend fun createTopRated(page: Int, last: Int) {
+        val topRatedAPI = RetroClient.movieAPI
+        val response = topRatedAPI.getTopRated(page)
+        if (response.isSuccessful) {
+            val nMovies: ArrayList<MovieDetails>? = response.body()?.results
+            if (loadingMoreTopRated) {
+                mMoviesTopRated.addAll(nMovies!!)
+                rvTopRated.scrollToPosition(last)
+            } else {
+                mMoviesTopRated = nMovies!!
+                rvTopRated.adapter = MovieAdapter(mMoviesTopRated, requireContext()).apply {
+                    notifyDataSetChanged()
+                }
+            }
+            loadingMoreTopRated = false
+        }
+    }
+
+    private fun loadMoreUpComing(i: Int) {
+        loadingMoreUpcoming = true
+        launch {
+            createUpcoming(i, lastVisibleItemIdUpcoming)
+        }
+    }
+
+    private suspend fun createUpcoming(page: Int, last: Int) {
+        val upcomingAPI = RetroClient.movieAPI
+        val response = upcomingAPI.getUpcoming(page)
+        if (response.isSuccessful) {
+            val nMovies: ArrayList<MovieDetails>? = response.body()?.results
+            if (loadingMoreUpcoming) {
+                mMoviesUpcoming.addAll(nMovies!!)
+                rvComingSoon.scrollToPosition(last)
+            } else {
+                mMoviesUpcoming = nMovies!!
+                rvComingSoon.adapter = MovieAdapter(mMoviesUpcoming, requireContext()).apply {
+                    notifyDataSetChanged()
+                }
+            }
+            loadingMoreUpcoming = false
+        }
+    }
+
+    private fun loadMoreCinema(i: Int) {
+        loadingMoreCinema = true
+        launch {
+            createCinema(i, lastVisibleItemIdCinema)
+        }
+    }
+
+    private suspend fun createCinema(page: Int, last: Int) {
+        val cinemaAPI = RetroClient.movieAPI
+        val response = cinemaAPI.getInCinema(page)
+
+        if (response.isSuccessful) {
+            val nMovies: ArrayList<MovieDetails>? = response.body()?.results
+            if (loadingMoreCinema) {
+                mMoviesCinema.addAll(nMovies!!)
+                rvCinemas.scrollToPosition(last)
+            } else {
+                mMoviesCinema = nMovies!!
+                rvCinemas.adapter = MovieAdapter(mMoviesCinema, requireContext()).apply {
+                    notifyDataSetChanged()
+                }
+            }
+            loadingMoreCinema = false
+        }
     }
 
     private fun loadMorePopular(i: Int) {
@@ -82,7 +192,7 @@ class MovieFragment : Fragment(), CoroutineScope {
         val popularAPI = RetroClient.movieAPI
         val response = popularAPI.getPopularMovies(page)
 
-        Log.d("Movies","${response.body()?.results}")
+        Log.d("Movies", "${response.body()?.results}")
         if (response.isSuccessful) {
             val nMovies: ArrayList<MovieDetails>? = response.body()?.results
             if (loadingMorePopular) {
