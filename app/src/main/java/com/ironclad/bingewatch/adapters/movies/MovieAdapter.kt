@@ -1,11 +1,14 @@
 package com.ironclad.bingewatch.adapters.movies
 
 import android.content.Context
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat.startActivity
 import androidx.recyclerview.widget.RecyclerView
 import com.ironclad.bingewatch.R
+import com.ironclad.bingewatch.activities.MovieActivity
 import com.ironclad.bingewatch.movie_modal.MovieDetails
 import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.cvmovies.view.*
@@ -25,7 +28,7 @@ class MovieAdapter(private val popularMovies: ArrayList<MovieDetails>, val conte
         holder.bind(popularMovie)
     }
 
-    class ViewHolder(itemView: View, context: Context) : RecyclerView.ViewHolder(itemView) {
+    class ViewHolder(itemView: View, val context: Context) : RecyclerView.ViewHolder(itemView) {
         fun bind(popularMovies: MovieDetails) {
             with(itemView) {
                 tvTitleMovie.text = popularMovies.title
@@ -33,6 +36,13 @@ class MovieAdapter(private val popularMovies: ArrayList<MovieDetails>, val conte
                 tvYearMovie.text = year
                 Picasso.get().load("https://image.tmdb.org/t/p/w500${popularMovies.poster_path}").fit()
                     .into(imagePoster)
+
+                setOnClickListener {
+                    val movieIntent = Intent(context, MovieActivity::class.java)
+                    movieIntent.putExtra("movieId", popularMovies.id)
+                    startActivity(context, movieIntent, null)
+
+                }
             }
         }
     }
