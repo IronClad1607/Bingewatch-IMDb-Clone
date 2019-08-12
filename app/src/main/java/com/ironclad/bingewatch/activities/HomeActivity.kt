@@ -7,7 +7,7 @@ import android.view.MenuItem
 import androidx.viewpager.widget.ViewPager
 import com.google.android.material.tabs.TabLayout
 import com.ironclad.bingewatch.R
-import com.ironclad.bingewatch.adapters.ViewPageAdapter
+import com.ironclad.bingewatch.adapters.ViewPagerAdapter
 import kotlinx.android.synthetic.main.activity_home.*
 
 class HomeActivity : AppCompatActivity() {
@@ -28,7 +28,7 @@ class HomeActivity : AppCompatActivity() {
         tabLayout!!.addTab(tabLayout!!.newTab().setText("Celebrities"))
         tabLayout!!.tabGravity = TabLayout.GRAVITY_FILL
 
-        val adapter = ViewPageAdapter(supportFragmentManager, tabLayout!!.tabCount)
+        val adapter = ViewPagerAdapter(supportFragmentManager, tabLayout!!.tabCount)
         viewPager!!.adapter = adapter
 
         viewPager!!.addOnPageChangeListener(TabLayout.TabLayoutOnPageChangeListener(tabLayout))
