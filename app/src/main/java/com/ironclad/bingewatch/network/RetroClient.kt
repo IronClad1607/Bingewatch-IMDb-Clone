@@ -10,7 +10,9 @@ object RetroClient {
         .build()
 
 
-    val authAPI = retrofit().create(AuthAPI::class.java)
+    val authAPI = retrofit().create(AuthAPI::class.java)!!
 
-    val movieAPI = retrofit().create(MovieAPI::class.java)
+    val movieAPI = retrofit().create(MovieAPI::class.java)!!
+
+    val peopleAPI = retrofit().create(PeopleAPI::class.java)!!
 }
