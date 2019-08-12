@@ -1,18 +1,16 @@
 package com.ironclad.bingewatch.activities
 
+import android.annotation.SuppressLint
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.widget.LinearLayout
-import com.google.android.material.snackbar.Snackbar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.ironclad.bingewatch.R
 import com.ironclad.bingewatch.adapters.movies.*
-import com.ironclad.bingewatch.movie_modal.CreditsResponse
-import com.ironclad.bingewatch.movie_modal.MovieAllDetails
-import com.ironclad.bingewatch.movie_modal.MovieDetails
-import com.ironclad.bingewatch.movie_modal.Review
+import com.ironclad.bingewatch.movie_modal.*
 import com.ironclad.bingewatch.network.RetroClient
 import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.activity_movie.*
@@ -21,22 +19,20 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlin.coroutines.CoroutineContext
+import kotlin.math.roundToLong
 
 class MovieActivity : AppCompatActivity(), CoroutineScope {
 
-    var iReview: Int = 2
     var iSimilar: Int = 2
-    var loadingMoreReview: Boolean = false
     var loadingMoreSimilar: Boolean = false
-    var lastVisibleItemIdReview: Int = 0
     var lastVisibleItemIdSimilar: Int = 0
-    var mReview = ArrayList<Review>()
     var mSimilar = ArrayList<MovieDetails>()
 
     override val coroutineContext: CoroutineContext
         get() = Dispatchers.Main
 
 
+    @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_movie)
@@ -45,6 +41,7 @@ class MovieActivity : AppCompatActivity(), CoroutineScope {
         launch {
             val movieBody = createDetails(movieID)
             val creditBody = createCredits(movieID)
+            val reviewBody = createReview(movieID)
             tvTitle.text = movieBody?.title
             val year = movieBody?.release_date?.substring(0, 4)
             tvYear.text = year
@@ -66,13 +63,19 @@ class MovieActivity : AppCompatActivity(), CoroutineScope {
             rvCrew.layoutManager = LinearLayoutManager(this@MovieActivity, LinearLayout.HORIZONTAL, false)
             rvGenresInMovies.layoutManager = LinearLayoutManager(this@MovieActivity, LinearLayout.HORIZONTAL, false)
             rvPC.layoutManager = LinearLayoutManager(this@MovieActivity, LinearLayout.HORIZONTAL, false)
-            val layoutManagerReview = LinearLayoutManager(this@MovieActivity, LinearLayout.HORIZONTAL, false)
             val layoutMangerSimilar = LinearLayoutManager(this@MovieActivity, LinearLayout.HORIZONTAL, false)
             rvSimilar.layoutManager = layoutMangerSimilar
             rvCast.adapter = CastAdapter(creditBody?.cast, this@MovieActivity)
             rvCrew.adapter = CrewAdapter(creditBody?.crew, this@MovieActivity)
-            rvPC.adapter = CompanyAdapter(movieBody?.production_companies, this@MovieActivity)
-            rvGenresInMovies.adapter = GenreAdapter(movieBody?.genres, this@MovieActivity)
+            rvPC.adapter = CompanyAdapter(movieBody.production_companies, this@MovieActivity)
+            rvGenresInMovies.adapter = GenreAdapter(movieBody.genres, this@MovieActivity)
+            if (reviewBody?.results?.size!! > 0) {
+                tvAuthor.text = reviewBody.results[0].author
+                tvContent.text = reviewBody.results[0].content
+            } else {
+                tvAuthor.text = "Nil"
+                tvContent.text = "Nil"
+            }
 
             createSimilar(1, movieID, 0)
 
@@ -91,6 +94,12 @@ class MovieActivity : AppCompatActivity(), CoroutineScope {
                     }
                 }
             })
+        }
+
+        btnSeell.setOnClickListener {
+            val reviewIntent = Intent(this, ReviewActivity::class.java)
+            reviewIntent.putExtra("movieReviewID", movieID)
+            startActivity(reviewIntent)
         }
 
     }
@@ -125,6 +134,16 @@ class MovieActivity : AppCompatActivity(), CoroutineScope {
                 rvSimilar.adapter = MovieAdapter(mSimilar, this)
             }
             loadingMoreSimilar = false
+        }
+    }
+
+    private suspend fun createReview(movieID: Int): Reviews? {
+        val reviewAPI = RetroClient.movieAPI
+        val response = reviewAPI.getReviews(movieID, 1)
+        return if (response.isSuccessful) {
+            response.body()
+        } else {
+            null
         }
     }
 
@@ -182,7 +201,7 @@ class MovieActivity : AppCompatActivity(), CoroutineScope {
         val billion = 1000000000L
         val trillion = 1000000000000L
 
-        val number = Math.round(b!!.toDouble())
+        val number = b!!.toDouble().roundToLong()
         if (number in million until billion) {
             val fraction = calculateFraction(number, million)
             return fraction.toString() + "Million"

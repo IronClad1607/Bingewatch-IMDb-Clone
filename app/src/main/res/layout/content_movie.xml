@@ -290,6 +290,7 @@
                         android:layout_gravity="right"
                         android:background="@color/lightGrey"
                         android:text="See All"
+                        android:id="@+id/btnSeell"
                         android:textColor="@android:color/white" />
                 </FrameLayout>
 
