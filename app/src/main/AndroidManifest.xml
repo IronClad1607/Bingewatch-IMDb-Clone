@@ -13,7 +13,8 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".activities.ReviewActivity"></activity>
+        <activity android:name=".activities.PeopleActivity"></activity>
+        <activity android:name=".activities.ReviewActivity" />
         <activity
             android:name=".activities.MovieActivity"
             android:label="@string/title_activity_movie"
